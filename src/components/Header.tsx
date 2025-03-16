@@ -2,6 +2,7 @@
 import React from 'react';
 import { SearchBar } from './SearchBar';
 import { cn } from '@/lib/utils';
+import { SettingsDialog } from './SettingsDialog';
 
 interface HeaderProps {
   className?: string;
@@ -24,8 +25,12 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
           </h1>
         </div>
         
-        <div className="w-full md:w-auto md:max-w-lg lg:max-w-xl xl:max-w-2xl animate-slide-down">
+        <div className="w-full md:w-auto md:max-w-lg lg:max-w-xl xl:max-w-2xl animate-slide-down flex-grow">
           <SearchBar />
+        </div>
+        
+        <div className="ml-2">
+          <SettingsDialog />
         </div>
       </div>
     </header>

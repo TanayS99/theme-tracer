@@ -1,10 +1,15 @@
-
 import { PostData } from '@/components/PostCard';
+import { fetchRealRedditPosts, getUseRealAPI } from './realRedditAPI';
 
 // Since we don't have a real backend, this simulates fetching data with random sentiments
 export async function fetchRedditPosts(query: string, isSubreddit: boolean): Promise<PostData[]> {
-  // In a real implementation, this would call a backend API that interfaces with Reddit
-  console.log(`Fetching ${isSubreddit ? 'subreddit' : 'search'}: ${query}`);
+  // Check if we should use the real API
+  if (getUseRealAPI()) {
+    return fetchRealRedditPosts(query, isSubreddit);
+  }
+  
+  // Otherwise use mock implementation
+  console.log(`Fetching mock ${isSubreddit ? 'subreddit' : 'search'}: ${query}`);
   
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1500));

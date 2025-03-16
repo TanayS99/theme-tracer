@@ -1,7 +1,7 @@
-
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { PostCard, PostData } from './PostCard';
+import React from "react";
+import { MessageSquare, ThumbsUp } from "lucide-react";
+import { PostCard, PostData } from "./PostCard";
+import { Skeleton } from "./ui/skeleton";
 
 interface ResultsPanelProps {
   loading: boolean;
@@ -9,10 +9,10 @@ interface ResultsPanelProps {
   className?: string;
 }
 
-export const ResultsPanel: React.FC<ResultsPanelProps> = ({ 
-  loading, 
+export const ResultsPanel: React.FC<ResultsPanelProps> = ({
+  loading,
   results,
-  className 
+  className,
 }) => {
   return (
     <div className={cn("w-full", className)}>

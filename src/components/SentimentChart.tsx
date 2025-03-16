@@ -1,8 +1,8 @@
 
-import React, { useMemo } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { cn } from '@/lib/utils';
-import { PostData } from './PostCard';
+import React, { useMemo } from "react";
+import { Card } from "./ui/card";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { PostData } from "./PostCard";
 
 interface SentimentChartProps {
   data: PostData[];
@@ -10,91 +10,64 @@ interface SentimentChartProps {
 }
 
 export const SentimentChart: React.FC<SentimentChartProps> = ({ data, className }) => {
-  const sentimentCounts = useMemo(() => {
-    const counts = {
-      positive: 0,
-      neutral: 0,
-      negative: 0
-    };
-    
-    data.forEach(post => {
-      counts[post.sentiment]++;
-    });
-    
+  const chartData = useMemo(() => {
+    // Count posts by sentiment
+    const sentimentCounts = data.reduce((acc, post) => {
+      acc[post.sentiment] = (acc[post.sentiment] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Convert to array for chart
     return [
-      { name: 'Positive', value: counts.positive, color: 'hsl(var(--sentiment-positive))' },
-      { name: 'Neutral', value: counts.neutral, color: 'hsl(var(--sentiment-neutral))' },
-      { name: 'Negative', value: counts.negative, color: 'hsl(var(--sentiment-negative))' }
-    ].filter(item => item.value > 0);
+      { name: "Positive", value: sentimentCounts.positive || 0, color: "#10b981" },
+      { name: "Neutral", value: sentimentCounts.neutral || 0, color: "#6366f1" },
+      { name: "Negative", value: sentimentCounts.negative || 0, color: "#ef4444" },
+    ];
   }, [data]);
-  
-  // If no data, show empty state
-  if (data.length === 0) {
-    return (
-      <div className={cn(
-        "flex flex-col items-center justify-center p-6 rounded-xl glass-card shadow-soft min-h-[200px]",
-        className
-      )}>
-        <p className="text-muted-foreground text-sm">No data available</p>
-      </div>
-    );
-  }
-  
+
+  const totalPosts = useMemo(() => 
+    chartData.reduce((sum, item) => sum + item.value, 0), 
+  [chartData]);
+
   return (
-    <div className={cn(
-      "p-5 rounded-xl glass-card shadow-soft",
-      className
-    )}>
-      <h3 className="text-base font-medium mb-4">Sentiment Distribution</h3>
-      <div className="h-[200px]">
-        <ResponsiveContainer width="100%" height="100%">
+    <Card className={`p-4 h-[240px] ${className}`}>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-medium">Sentiment Analysis</h3>
+        <span className="text-xs text-muted-foreground">{totalPosts} posts</span>
+      </div>
+
+      {totalPosts > 0 ? (
+        <ResponsiveContainer width="100%" height={170}>
           <PieChart>
             <Pie
-              data={sentimentCounts}
+              data={chartData}
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={80}
-              paddingAngle={4}
+              innerRadius={40}
+              outerRadius={70}
+              paddingAngle={2}
               dataKey="value"
-              animationDuration={800}
-              animationBegin={200}
+              labelLine={false}
+              label={({ name, value }) => 
+                value > 0 ? `${name} (${Math.round((value / totalPosts) * 100)}%)` : ""}
             >
-              {sentimentCounts.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={entry.color} 
-                  stroke="transparent"
-                />
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
             <Tooltip
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <div className="bg-background p-2 border border-border rounded-md shadow-md text-sm">
-                      <p>{`${payload[0].name}: ${payload[0].value} (${Math.round((payload[0].value / data.length) * 100)}%)`}</p>
-                    </div>
-                  );
-                }
-                return null;
-              }}
+              formatter={(value, name) => [
+                `${value} posts (${Math.round(Number(value) * 100 / totalPosts)}%)`,
+                name
+              ]}
             />
           </PieChart>
         </ResponsiveContainer>
-      </div>
-      
-      <div className="flex justify-center items-center gap-6 mt-2">
-        {sentimentCounts.map((entry, index) => (
-          <div key={index} className="flex items-center">
-            <div 
-              className="w-3 h-3 rounded-full mr-2" 
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-xs text-muted-foreground">{entry.name}</span>
-          </div>
-        ))}
-      </div>
-    </div>
+      ) : (
+        <div className="h-[170px] flex items-center justify-center text-muted-foreground text-sm">
+          No data available
+        </div>
+      )}
+    </Card>
   );
 };
