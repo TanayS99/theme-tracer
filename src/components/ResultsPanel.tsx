@@ -1,7 +1,9 @@
+
 import React from "react";
 import { MessageSquare, ThumbsUp } from "lucide-react";
 import { PostCard, PostData } from "./PostCard";
 import { Skeleton } from "./ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface ResultsPanelProps {
   loading: boolean;
