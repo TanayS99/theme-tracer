@@ -5,6 +5,7 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle,
+  DialogDescription,
   DialogTrigger
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -24,7 +25,7 @@ export const SettingsDialog = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
+        <Button variant="outline" size="icon" className="rounded-full h-10 w-10 border-border hover:bg-secondary">
           <Settings className="h-5 w-5" />
           <span className="sr-only">Settings</span>
         </Button>
@@ -32,6 +33,9 @@ export const SettingsDialog = () => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
+          <DialogDescription>
+            Configure application settings and preferences
+          </DialogDescription>
         </DialogHeader>
         
         <div className="py-6 space-y-6">
