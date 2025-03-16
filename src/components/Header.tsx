@@ -6,9 +6,10 @@ import { SettingsDialog } from './SettingsDialog';
 
 interface HeaderProps {
   className?: string;
+  onSearch?: (searchTerm: string, isSubreddit: boolean) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ className }) => {
+export const Header: React.FC<HeaderProps> = ({ className, onSearch }) => {
   return (
     <header className={cn(
       "fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300",
@@ -26,7 +27,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
         </div>
         
         <div className="w-full md:w-auto md:max-w-lg lg:max-w-xl xl:max-w-2xl animate-slide-down flex-grow">
-          <SearchBar />
+          <SearchBar onSearch={onSearch} />
         </div>
         
         <div className="ml-2">

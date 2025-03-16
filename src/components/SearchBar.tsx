@@ -19,6 +19,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
+      console.log("SearchBar: Submitting search", { searchTerm, isSubreddit });
       onSearch(searchTerm, isSubreddit);
     }
   };

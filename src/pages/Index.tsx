@@ -17,6 +17,7 @@ const Index = () => {
   
   const handleSearch = async (searchTerm: string, isSubreddit: boolean) => {
     try {
+      console.log("Index: Search triggered", { searchTerm, isSubreddit });
       setLoading(true);
       setSearchPerformed(true);
       
@@ -47,7 +48,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile header (visible on mobile only) */}
-      <Header className="md:hidden" />
+      <Header className="md:hidden" onSearch={handleSearch} />
       
       <div className="pt-24 md:pt-0 min-h-screen flex flex-col md:flex-row">
         {/* Left sidebar with search (hidden on mobile) */}
