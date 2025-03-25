@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { SearchBar } from '@/components/SearchBar';
 import { ResultsPanel } from '@/components/ResultsPanel';
@@ -8,16 +8,32 @@ import { WordCloud } from '@/components/WordCloud';
 import { PostData } from '@/components/PostCard';
 import { fetchRedditPosts } from '@/api/redditAPI';
 import { useToast } from '@/hooks/use-toast';
+import { getUseRealAPI } from '@/api/realRedditAPI';
 
 const Index = () => {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<PostData[]>([]);
   const [searchPerformed, setSearchPerformed] = useState(false);
+  const [isUsingRealAPI, setIsUsingRealAPI] = useState(getUseRealAPI());
   const { toast } = useToast();
+  
+  // Check the API mode whenever it might change
+  useEffect(() => {
+    const checkAPIMode = () => {
+      const currentAPIMode = getUseRealAPI();
+      setIsUsingRealAPI(currentAPIMode);
+    };
+    
+    // Check initially and set up an interval to check periodically
+    checkAPIMode();
+    const intervalId = setInterval(checkAPIMode, 1000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
   
   const handleSearch = async (searchTerm: string, isSubreddit: boolean) => {
     try {
-      console.log("Index: Search triggered", { searchTerm, isSubreddit });
+      console.log("Index: Search triggered", { searchTerm, isSubreddit, usingRealAPI: isUsingRealAPI });
       setLoading(true);
       setSearchPerformed(true);
       
@@ -79,7 +95,7 @@ const Index = () => {
           
           <div className="mt-auto pt-4 text-xs text-muted-foreground border-t border-border">
             <p>© {new Date().getFullYear()} ThemeTracer</p>
-            <p>Data sourced from Reddit API</p>
+            <p>Data sourced from {isUsingRealAPI ? 'Reddit API' : 'mock data'}</p>
           </div>
         </div>
         

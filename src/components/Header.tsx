@@ -30,7 +30,7 @@ export const Header: React.FC<HeaderProps> = ({ className, onSearch }) => {
           <SearchBar onSearch={onSearch} />
         </div>
         
-        <div className="ml-2 flex items-center">
+        <div className="ml-2 flex items-center gap-2">
           <SettingsDialog />
         </div>
       </div>

@@ -13,24 +13,42 @@ import { Switch } from '@/components/ui/switch';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { setUseRealAPI, getUseRealAPI } from '@/api/realRedditAPI';
+import { useToast } from '@/hooks/use-toast';
 
 export const SettingsDialog = () => {
   const [useRealAPI, setUseRealAPIState] = React.useState(() => getUseRealAPI());
+  const { toast } = useToast();
   
   const handleToggleRealAPI = (checked: boolean) => {
     setUseRealAPI(checked);
     setUseRealAPIState(checked);
+    
+    // Show a toast notification when the setting changes
+    toast({
+      title: checked ? "Using Real Reddit API" : "Using Mock Data",
+      description: checked 
+        ? "Now fetching real data from Reddit" 
+        : "Now using simulated data for demos",
+      duration: 3000,
+    });
+    
+    console.log("API mode toggled:", checked ? "real" : "mock");
   };
   
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className="rounded-full h-10 w-10 border-border hover:bg-secondary">
-          <Settings className="h-5 w-5" />
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="rounded-full h-10 w-10 border border-primary/30 hover:border-primary hover:bg-secondary relative"
+          title="Settings"
+        >
+          <Settings className="h-5 w-5 text-primary" />
           <span className="sr-only">Settings</span>
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
