@@ -1,15 +1,20 @@
 import { PostData } from '@/components/PostCard';
-import { fetchRealRedditPosts, getUseRealAPI } from './realRedditAPI';
+import { fetchRealRedditPosts, getUseRealAPI, DEFAULT_LIMIT } from './realRedditAPI';
 
 // Since we don't have a real backend, this simulates fetching data with random sentiments
-export async function fetchRedditPosts(query: string, isSubreddit: boolean): Promise<PostData[]> {
+export async function fetchRedditPosts(
+  query: string, 
+  isSubreddit: boolean,
+  limit: number = DEFAULT_LIMIT,
+  after?: string
+): Promise<{ posts: PostData[], after?: string }> {
   // Check if we should use the real API
   if (getUseRealAPI()) {
-    return fetchRealRedditPosts(query, isSubreddit);
+    return fetchRealRedditPosts(query, isSubreddit, limit, after);
   }
   
   // Otherwise use mock implementation
-  console.log(`Fetching mock ${isSubreddit ? 'subreddit' : 'search'}: ${query}`);
+  console.log(`Fetching mock ${isSubreddit ? 'subreddit' : 'search'}: ${query}, limit: ${limit}, after: ${after || 'none'}`);
   
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1500));
@@ -24,7 +29,7 @@ export async function fetchRedditPosts(query: string, isSubreddit: boolean): Pro
     const subreddit = isSubreddit ? query.replace(/^r\//, '') : subreddits[Math.floor(Math.random() * subreddits.length)];
     
     return {
-      id: `post-${Date.now()}-${i}`,
+      id: `post-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 5)}`,
       title: generateTitle(query, sentiment),
       content: generateContent(query, sentiment),
       subreddit,
@@ -37,7 +42,11 @@ export async function fetchRedditPosts(query: string, isSubreddit: boolean): Pro
     };
   });
   
-  return mockPosts;
+  // Generate a fake "after" token for pagination
+  const hasMore = Math.random() > 0.3; // 70% chance of having more pages
+  const mockAfter = hasMore ? `t3_${Math.random().toString(36).substring(2, 10)}` : undefined;
+  
+  return { posts: mockPosts, after: mockAfter };
 }
 
 // Helper functions to generate mock content

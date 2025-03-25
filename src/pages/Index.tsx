@@ -9,12 +9,17 @@ import { PostData } from '@/components/PostCard';
 import { fetchRedditPosts } from '@/api/redditAPI';
 import { useToast } from '@/hooks/use-toast';
 import { getUseRealAPI } from '@/api/realRedditAPI';
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 const Index = () => {
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [results, setResults] = useState<PostData[]>([]);
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [isUsingRealAPI, setIsUsingRealAPI] = useState(getUseRealAPI());
+  const [currentSearch, setCurrentSearch] = useState({ term: '', isSubreddit: false });
+  const [paginationToken, setPaginationToken] = useState<string | undefined>(undefined);
+  const [hasMorePages, setHasMorePages] = useState(false);
   const { toast } = useToast();
   
   // Check the API mode whenever it might change
@@ -36,15 +41,19 @@ const Index = () => {
       console.log("Index: Search triggered", { searchTerm, isSubreddit, usingRealAPI: isUsingRealAPI });
       setLoading(true);
       setSearchPerformed(true);
+      setCurrentSearch({ term: searchTerm, isSubreddit });
+      setPaginationToken(undefined);
       
       // Fetch data
-      const posts = await fetchRedditPosts(searchTerm, isSubreddit);
-      setResults(posts);
+      const response = await fetchRedditPosts(searchTerm, isSubreddit);
+      setResults(response.posts);
+      setPaginationToken(response.after);
+      setHasMorePages(!!response.after);
       
       // Show success toast
       toast({
         title: "Search completed",
-        description: `Found ${posts.length} posts about "${searchTerm}"`,
+        description: `Found ${response.posts.length} posts about "${searchTerm}"`,
         duration: 3000,
       });
     } catch (error) {
@@ -56,8 +65,52 @@ const Index = () => {
         duration: 5000,
       });
       setResults([]);
+      setHasMorePages(false);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const handleLoadMore = async () => {
+    if (!paginationToken || !currentSearch.term) return;
+    
+    try {
+      setLoadingMore(true);
+      console.log("Loading more posts", { 
+        searchTerm: currentSearch.term, 
+        isSubreddit: currentSearch.isSubreddit, 
+        after: paginationToken 
+      });
+      
+      // Fetch next page of data
+      const response = await fetchRedditPosts(
+        currentSearch.term, 
+        currentSearch.isSubreddit,
+        10, // Keep the same limit per page
+        paginationToken
+      );
+      
+      // Append new posts to results
+      setResults(prevResults => [...prevResults, ...response.posts]);
+      setPaginationToken(response.after);
+      setHasMorePages(!!response.after);
+      
+      // Show success toast
+      toast({
+        title: "More posts loaded",
+        description: `Loaded ${response.posts.length} more posts`,
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Error loading more posts:', error);
+      toast({
+        title: "Error",
+        description: "Couldn't load more posts. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setLoadingMore(false);
     }
   };
   
@@ -131,8 +184,32 @@ const Index = () => {
               <ResultsPanel
                 loading={loading}
                 results={results}
-                className="mb-10"
+                className="mb-6"
               />
+              
+              {/* Pagination */}
+              {results.length > 0 && !loading && (
+                <div className="flex justify-center mt-6 mb-10">
+                  <Pagination>
+                    <PaginationContent>
+                      {hasMorePages && (
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={handleLoadMore}
+                            disabled={loadingMore}
+                            className={loadingMore ? "opacity-50 cursor-not-allowed" : ""}
+                          />
+                        </PaginationItem>
+                      )}
+                    </PaginationContent>
+                  </Pagination>
+                  {loadingMore && (
+                    <div className="text-center text-sm text-muted-foreground mt-2">
+                      Loading more posts...
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -11,24 +11,29 @@ const CLIENT_ID = 'sFsWQcjiT10AT8fnJfLQ';
 const REDIRECT_URI = window.location.origin;
 const USER_AGENT = 'ThemeTracer/1.0 (by ApprehensiveWin4012)';
 
-// For frontend-only apps, we use the "implicit grant flow" which doesn't require the client secret
-// We only include user agent in requests
+// Default results per page
+export const DEFAULT_LIMIT = 10;
 
 /**
  * Fetch posts from Reddit (real API implementation)
  */
-export async function fetchRealRedditPosts(query: string, isSubreddit: boolean): Promise<PostData[]> {
+export async function fetchRealRedditPosts(
+  query: string, 
+  isSubreddit: boolean, 
+  limit: number = DEFAULT_LIMIT,
+  after?: string
+): Promise<{ posts: PostData[], after?: string }> {
   try {
-    console.log(`Fetching real Reddit ${isSubreddit ? 'subreddit' : 'search'}: ${query}`);
+    console.log(`Fetching real Reddit ${isSubreddit ? 'subreddit' : 'search'}: ${query}, limit: ${limit}, after: ${after || 'none'}`);
     
     // Construct the appropriate URL based on whether we're searching or browsing a subreddit
     let url: string;
     if (isSubreddit) {
       // Remove r/ prefix if present
       const subredditName = query.replace(/^r\//, '');
-      url = `${API_URL}/r/${subredditName}/hot.json?limit=10`;
+      url = `${API_URL}/r/${subredditName}/hot.json?limit=${limit}${after ? `&after=${after}` : ''}`;
     } else {
-      url = `${API_URL}/search.json?q=${encodeURIComponent(query)}&limit=10`;
+      url = `${API_URL}/search.json?q=${encodeURIComponent(query)}&limit=${limit}${after ? `&after=${after}` : ''}`;
     }
     
     // Make the request
@@ -68,7 +73,11 @@ export async function fetchRealRedditPosts(query: string, isSubreddit: boolean):
       })
     );
     
-    return posts;
+    // Return the posts and the "after" token for pagination
+    return {
+      posts,
+      after: data.data.after
+    };
   } catch (error) {
     console.error('Error fetching from Reddit API:', error);
     throw error;

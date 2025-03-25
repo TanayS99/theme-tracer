@@ -27,7 +27,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({
         )}
       </div>
       
-      {loading ? (
+      {loading && results.length === 0 ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <div 
