@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { SearchBar } from '@/components/SearchBar';
 import { ResultsPanel } from '@/components/ResultsPanel';
@@ -9,7 +9,8 @@ import { PostData } from '@/components/PostCard';
 import { fetchRedditPosts } from '@/api/redditAPI';
 import { useToast } from '@/hooks/use-toast';
 import { getUseRealAPI } from '@/api/realRedditAPI';
-import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Button } from '@/components/ui/button';
+import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/pagination';
 
 const Index = () => {
   const [loading, setLoading] = useState(false);
@@ -22,14 +23,12 @@ const Index = () => {
   const [hasMorePages, setHasMorePages] = useState(false);
   const { toast } = useToast();
   
-  // Check the API mode whenever it might change
   useEffect(() => {
     const checkAPIMode = () => {
       const currentAPIMode = getUseRealAPI();
       setIsUsingRealAPI(currentAPIMode);
     };
     
-    // Check initially and set up an interval to check periodically
     checkAPIMode();
     const intervalId = setInterval(checkAPIMode, 1000);
     
@@ -44,13 +43,11 @@ const Index = () => {
       setCurrentSearch({ term: searchTerm, isSubreddit });
       setPaginationToken(undefined);
       
-      // Fetch data
       const response = await fetchRedditPosts(searchTerm, isSubreddit);
       setResults(response.posts);
       setPaginationToken(response.after);
       setHasMorePages(!!response.after);
       
-      // Show success toast
       toast({
         title: "Search completed",
         description: `Found ${response.posts.length} posts about "${searchTerm}"`,
@@ -82,20 +79,17 @@ const Index = () => {
         after: paginationToken 
       });
       
-      // Fetch next page of data
       const response = await fetchRedditPosts(
         currentSearch.term, 
         currentSearch.isSubreddit,
-        10, // Keep the same limit per page
+        10,
         paginationToken
       );
       
-      // Append new posts to results
       setResults(prevResults => [...prevResults, ...response.posts]);
       setPaginationToken(response.after);
       setHasMorePages(!!response.after);
       
-      // Show success toast
       toast({
         title: "More posts loaded",
         description: `Loaded ${response.posts.length} more posts`,
@@ -116,11 +110,9 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile header (visible on mobile only) */}
       <Header className="md:hidden" onSearch={handleSearch} />
       
       <div className="pt-24 md:pt-0 min-h-screen flex flex-col md:flex-row">
-        {/* Left sidebar with search (hidden on mobile) */}
         <div className="hidden md:flex md:w-72 lg:w-80 shrink-0 h-screen p-6 flex-col border-r border-border animate-fade-in">
           <div className="flex items-center mb-8">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 mr-3 flex items-center justify-center shadow-md">
@@ -152,7 +144,6 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Main content */}
         <div className="w-full min-h-screen p-6 pb-20 md:p-8 lg:p-10">
           {!searchPerformed && !loading ? (
             <div className="max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[80vh] text-center animate-fade-in">
@@ -173,7 +164,6 @@ const Index = () => {
             </div>
           ) : (
             <div className="max-w-6xl mx-auto">
-              {/* Mobile-only charts */}
               {results.length > 0 && (
                 <div className="md:hidden mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <SentimentChart data={results} />
@@ -187,18 +177,20 @@ const Index = () => {
                 className="mb-6"
               />
               
-              {/* Pagination */}
               {results.length > 0 && !loading && (
                 <div className="flex justify-center mt-6 mb-10">
                   <Pagination>
                     <PaginationContent>
                       {hasMorePages && (
                         <PaginationItem>
-                          <PaginationNext
+                          <Button 
                             onClick={handleLoadMore}
                             disabled={loadingMore}
-                            className={loadingMore ? "opacity-50 cursor-not-allowed" : ""}
-                          />
+                            className={`gap-1 pr-2.5 ${loadingMore ? "opacity-50" : ""}`}
+                          >
+                            <span>Next</span>
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
                         </PaginationItem>
                       )}
                     </PaginationContent>
