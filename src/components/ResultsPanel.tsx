@@ -8,21 +8,26 @@ import { cn } from "@/lib/utils";
 interface ResultsPanelProps {
   loading: boolean;
   results: PostData[];
+  totalPosts?: number;
   className?: string;
 }
 
 export const ResultsPanel: React.FC<ResultsPanelProps> = ({
   loading,
   results,
+  totalPosts,
   className,
 }) => {
+  // Use totalPosts if provided, otherwise fall back to results.length
+  const postCount = totalPosts !== undefined ? totalPosts : results.length;
+
   return (
     <div className={cn("w-full", className)}>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-medium">Results</h2>
         {results.length > 0 && (
           <span className="text-sm text-muted-foreground">
-            {results.length} {results.length === 1 ? 'post' : 'posts'} found
+            {postCount} {postCount === 1 ? 'post' : 'posts'} found
           </span>
         )}
       </div>
