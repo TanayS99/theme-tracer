@@ -87,7 +87,7 @@ export async function fetchRealRedditPosts(
 /**
  * Toggle between mock and real API implementation
  */
-let useRealAPI = false;
+let useRealAPI = true; // Changed default from false to true
 
 /**
  * Set whether to use the real Reddit API
