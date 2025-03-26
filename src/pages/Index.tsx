@@ -50,12 +50,12 @@ const Index = () => {
       setPaginationToken(response.after);
       setHasMorePages(!!response.after);
       
-      // Set initial total post count (this will be a minimum)
-      setTotalPostCount(response.posts.length);
+      // Set total post count from API response or fall back to current result count
+      setTotalPostCount(response.totalPostCount || response.posts.length);
       
       toast({
         title: "Search completed",
-        description: `Found ${response.posts.length} posts about "${searchTerm}"`,
+        description: `Found ${response.totalPostCount || response.posts.length} posts about "${searchTerm}"`,
         duration: 3000,
       });
     } catch (error) {
@@ -96,8 +96,11 @@ const Index = () => {
       setPaginationToken(response.after);
       setHasMorePages(!!response.after);
       
-      // Update total post count
-      setTotalPostCount(prevCount => prevCount + response.posts.length);
+      // Don't update total post count when loading more (we already have it from initial search)
+      // Unless the API returns a new totalPostCount value that's different
+      if (response.totalPostCount && response.totalPostCount !== totalPostCount) {
+        setTotalPostCount(response.totalPostCount);
+      }
       
       toast({
         title: "More posts loaded",

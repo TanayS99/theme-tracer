@@ -7,7 +7,7 @@ export async function fetchRedditPosts(
   isSubreddit: boolean,
   limit: number = DEFAULT_LIMIT,
   after?: string
-): Promise<{ posts: PostData[], after?: string }> {
+): Promise<{ posts: PostData[], after?: string, totalPostCount?: number }> {
   // Check if we should use the real API
   if (getUseRealAPI()) {
     return fetchRealRedditPosts(query, isSubreddit, limit, after);
@@ -46,7 +46,10 @@ export async function fetchRedditPosts(
   const hasMore = Math.random() > 0.3; // 70% chance of having more pages
   const mockAfter = hasMore ? `t3_${Math.random().toString(36).substring(2, 10)}` : undefined;
   
-  return { posts: mockPosts, after: mockAfter };
+  // For mock data, simulate total count as 3-10x the current count
+  const mockTotalCount = Math.floor(Math.random() * 9 * count) + count;
+  
+  return { posts: mockPosts, after: mockAfter, totalPostCount: mockTotalCount };
 }
 
 // Helper functions to generate mock content
