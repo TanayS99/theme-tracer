@@ -49,6 +49,10 @@ export function generateInsights(posts: PostData[], idea?: string): string {
     .slice(0, 6)
     .map(([word]) => word);
 
+  // Calculate high engagement posts percentage
+  const highEngagementPosts = posts.filter(post => post.upvotes > 1000).length;
+  const percentHighEngagement = Math.round((highEngagementPosts / total) * 100);
+
   // Generate the insight text
   let insight = '';
 
@@ -76,9 +80,6 @@ export function generateInsights(posts: PostData[], idea?: string): string {
     }
     
     // Engagement and interest level
-    const highEngagementPosts = posts.filter(post => post.upvotes > 1000).length;
-    const percentHighEngagement = Math.round((highEngagementPosts / total) * 100);
-    
     insight += `**Market Interest:** `;
     if (percentHighEngagement > 30) {
       insight += `There's strong interest in this space with ${percentHighEngagement}% of related discussions receiving high engagement. This indicates significant market demand.\n\n`;
