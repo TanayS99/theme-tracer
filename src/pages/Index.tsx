@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Search } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { SearchBar } from '@/components/SearchBar';
 import { ResultsPanel } from '@/components/ResultsPanel';
@@ -13,6 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { getUseRealAPI } from '@/api/realRedditAPI';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/pagination';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 const Index = () => {
   const [loading, setLoading] = useState(false);
@@ -24,6 +26,7 @@ const Index = () => {
   const [paginationToken, setPaginationToken] = useState<string | undefined>(undefined);
   const [hasMorePages, setHasMorePages] = useState(false);
   const [totalPostCount, setTotalPostCount] = useState(0);
+  const [userIdea, setUserIdea] = useState('');
   const { toast } = useToast();
   
   useEffect(() => {
@@ -51,7 +54,6 @@ const Index = () => {
       setPaginationToken(response.after);
       setHasMorePages(!!response.after);
       
-      // Set total post count from API response or fall back to current result count
       setTotalPostCount(response.totalPostCount || response.posts.length);
       
       toast({
@@ -73,6 +75,14 @@ const Index = () => {
     } finally {
       setLoading(false);
     }
+  };
+  
+  const handleIdeaSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userIdea.trim()) return;
+    
+    // Start searching with the user's idea
+    handleSearch(userIdea, false);
   };
   
   const handleLoadMore = async () => {
@@ -97,8 +107,6 @@ const Index = () => {
       setPaginationToken(response.after);
       setHasMorePages(!!response.after);
       
-      // Don't update total post count when loading more (we already have it from initial search)
-      // Unless the API returns a new totalPostCount value that's different
       if (response.totalPostCount && response.totalPostCount !== totalPostCount) {
         setTotalPostCount(response.totalPostCount);
       }
@@ -143,11 +151,15 @@ const Index = () => {
           </div>
           
           <div className="grow overflow-auto">
-            {results.length > 0 && (
+            {(results.length > 0 || (loading && userIdea)) && (
               <div className="space-y-4 animate-fade-in">
                 <SentimentChart data={results} />
                 <WordCloud data={results} />
-                <AIInsights data={results} />
+                <AIInsights 
+                  data={results} 
+                  idea={userIdea}
+                  isLoading={loading && results.length === 0} 
+                />
               </div>
             )}
           </div>
@@ -169,12 +181,26 @@ const Index = () => {
                 <span>tracer</span>
               </h1>
               <p className="text-muted-foreground mb-8 max-w-md">
-                Analyze sentiment and extract themes from Reddit discussions. Enter a keyword, topic, or subreddit name to get started.
+                Share your idea or business concept, and I'll analyze Reddit to find relevant communities, 
+                sentiment, and trending discussions.
               </p>
               
-              <div className="w-full max-w-md">
-                <SearchBar onSearch={handleSearch} />
-              </div>
+              <form onSubmit={handleIdeaSubmit} className="w-full max-w-md space-y-4">
+                <Textarea
+                  placeholder="Describe your idea, product, or niche..."
+                  value={userIdea}
+                  onChange={(e) => setUserIdea(e.target.value)}
+                  className="min-h-[120px] resize-none"
+                />
+                <Button 
+                  type="submit" 
+                  className="w-full flex items-center justify-center gap-2"
+                  disabled={!userIdea.trim()}
+                >
+                  <Search className="h-4 w-4" />
+                  <span>Analyze My Idea</span>
+                </Button>
+              </form>
             </div>
           ) : (
             <div className="max-w-6xl mx-auto">
@@ -182,7 +208,12 @@ const Index = () => {
                 <div className="md:hidden mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <SentimentChart data={results} />
                   <WordCloud data={results} />
-                  <AIInsights data={results} className="sm:col-span-2" />
+                  <AIInsights 
+                    data={results} 
+                    idea={userIdea}
+                    className="sm:col-span-2" 
+                    isLoading={loading && results.length === 0}
+                  />
                 </div>
               )}
               
