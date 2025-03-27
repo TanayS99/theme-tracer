@@ -22,7 +22,7 @@ export async function fetchRealRedditPosts(
   isSubreddit: boolean, 
   limit: number = DEFAULT_LIMIT,
   after?: string
-): Promise<{ posts: PostData[], after?: string }> {
+): Promise<{ posts: PostData[], after?: string, totalPostCount?: number }> {
   try {
     console.log(`Fetching real Reddit ${isSubreddit ? 'subreddit' : 'search'}: ${query}, limit: ${limit}, after: ${after || 'none'}`);
     
@@ -74,9 +74,14 @@ export async function fetchRealRedditPosts(
     );
     
     // Return the posts and the "after" token for pagination
+    // Add an estimate of total posts (this is an approximation since Reddit API doesn't provide exact counts)
+    // Using the dist field from the data response if available, otherwise a rough estimate
+    const totalPostCount = data.data.dist || (data.data.children.length * 2);
+    
     return {
       posts,
-      after: data.data.after
+      after: data.data.after,
+      totalPostCount
     };
   } catch (error) {
     console.error('Error fetching from Reddit API:', error);

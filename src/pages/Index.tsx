@@ -6,6 +6,7 @@ import { SearchBar } from '@/components/SearchBar';
 import { ResultsPanel } from '@/components/ResultsPanel';
 import { SentimentChart } from '@/components/SentimentChart';
 import { WordCloud } from '@/components/WordCloud';
+import { AIInsights } from '@/components/AIInsights';
 import { PostData } from '@/components/PostCard';
 import { fetchRedditPosts } from '@/api/redditAPI';
 import { useToast } from '@/hooks/use-toast';
@@ -141,11 +142,12 @@ const Index = () => {
             <SearchBar onSearch={handleSearch} />
           </div>
           
-          <div className="grow">
+          <div className="grow overflow-auto">
             {results.length > 0 && (
               <div className="space-y-4 animate-fade-in">
                 <SentimentChart data={results} />
                 <WordCloud data={results} />
+                <AIInsights data={results} />
               </div>
             )}
           </div>
@@ -180,6 +182,7 @@ const Index = () => {
                 <div className="md:hidden mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <SentimentChart data={results} />
                   <WordCloud data={results} />
+                  <AIInsights data={results} className="sm:col-span-2" />
                 </div>
               )}
               
